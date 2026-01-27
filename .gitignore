@@ -1,3 +1,11 @@
+#--------------------------
+# Node (Express backend)
+#--------------------------
+
+backend/node_modules
+backend/.env
+
+
 # Python-generated files
 __pycache__/
 *.py[oc]
@@ -11,3 +19,4 @@ wheels/
 
 #idea files for config editor
 .idea/
+
