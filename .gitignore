@@ -20,3 +20,6 @@ wheels/
 #idea files for config editor
 .idea/
 
+#OS STORE config files
+.DS_Store
+
