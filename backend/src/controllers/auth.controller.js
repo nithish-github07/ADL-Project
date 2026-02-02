@@ -30,7 +30,6 @@ export const login = async (req,res) =>{
         {expiresIn: "7d"}
     );
 
-    console.log("JWT Secret: ", process.env.JWT_SECRET);
 
     res.json({token});
 };
