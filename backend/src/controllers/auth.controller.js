@@ -3,7 +3,8 @@ import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 
 export const register = async (req,res)=>{
-    const {name,email,password} = req.body;
+    const {email,password} = req.body;
+    const name = email.split("@")[0];
     
     const exists = await User.findOne({email});
     if(exists) return res.status(409).json({message: "User exists"});

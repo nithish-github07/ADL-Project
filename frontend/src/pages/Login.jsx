@@ -38,7 +38,6 @@ const Login = () => {
 
       setSuccess("Login successful! Redirecting...");
       localStorage.setItem("token", response.data.token);
-      localStorage.setItem("user", JSON.stringify(response.data.user));
 
       setTimeout(() => {
         navigate("/dashboard");
@@ -110,7 +109,7 @@ const Login = () => {
                     onClick={() => setShowPassword(!showPassword)}
                     className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-700 transition text-lg"
                   >
-                    {showPassword ? "🙈" : "👁️"}
+                    {showPassword ? <i className = "fa-solid fa-eye-slash"></i> : <i className = "fa-solid fa-eye"></i>}
                   </button>
                 </div>
               </div>
