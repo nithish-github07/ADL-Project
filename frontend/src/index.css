@@ -1,6 +1,6 @@
 @tailwind base;
 @tailwind components;
-@tailwind utilities;
+@tailwi nd utilities;
 
 * {
   margin: 0;
@@ -163,8 +163,3 @@ button:hover:not(:disabled) {
   animation: pulse-subtle 2s ease-in-out infinite;
 }
 
-i.fa-solid::before {
-  font-style: normal;
-  font-family: 'Font Awesome 6 Free';
-  font-weight: 900;
-}
