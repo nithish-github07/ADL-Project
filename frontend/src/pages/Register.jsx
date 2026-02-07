@@ -85,11 +85,8 @@ const Register = () => {
       });
 
       setSuccess("OTP sent to your email. Please verify to complete registration.");
-      //setStep(2);
+      setStep(2);
       setError("");
-      setTimeout(() => {
-        navigate("/login");
-      },1500);
     } catch (err) {
       setError(err.response?.data?.message || "Registration failed");
     } finally {
