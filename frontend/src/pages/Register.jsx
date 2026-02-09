@@ -197,7 +197,7 @@ const Register = () => {
                       onClick={() => setShowPassword(!showPassword)}
                       className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-700 transition text-lg"
                     >
-                      {showPassword ? "🙈" : "👁️"}
+                    {showPassword ? <i className = "fa-solid fa-eye-slash" ></i> : <i className = "fa-solid fa-eye"></i>}
                     </button>
                   </div>
 
@@ -241,7 +241,7 @@ const Register = () => {
                       onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                       className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-700 transition text-lg"
                     >
-                      {showConfirmPassword ? "🙈" : "👁️"}
+                      {showConfirmPassword ? <i className = "fa-solid fa-eye-slash"></i> : <i className = "fa-solid fa-eye"></i>}
                     </button>
                   </div>
                   {confirmPassword && password !== confirmPassword && (
