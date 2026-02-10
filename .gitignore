@@ -13,7 +13,7 @@ build/
 dist/
 wheels/
 *.egg-info
-.env
+recommendation_engine/.env
 # Virtual environments
 .venv
 
