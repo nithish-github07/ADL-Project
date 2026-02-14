@@ -102,6 +102,12 @@ export const verifyOtp = async(req,res) => {
         user.otpExpires = undefined;
         await user.save();
 
+        const token = jwt.sign(
+            { id: user._id },
+            process.env.JWT_SECRET,
+            { expiresIn: "7d" }
+        );
+
         res.json({message: "Account verified successfully"});
     } catch(err){
         console.error(err);

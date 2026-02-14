@@ -106,14 +106,15 @@ const Register = () => {
 
     setLoading(true);
     try {
-      await axios.post(`${API_URL}/verify-otp`, {
+      const response = await axios.post(`${API_URL}/verify-otp`, {
         email,
         otp,
       });
 
-      setSuccess("Account verified successfully! Redirecting to login...");
+      localStorage.setItem("token", response.data.token);
+      setSuccess("Account verified successfully! Redirecting to dashboard...");
       setTimeout(() => {
-        navigate("/login");
+        navigate("/dashboard");
       }, 2000);
     } catch (err) {
       setError(err.response?.data?.message || "OTP verification failed");
