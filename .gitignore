@@ -4,7 +4,7 @@
 
 backend/node_modules
 backend/.env
-
+frontend/node_modules/
 
 # Python-generated files
 __pycache__/
