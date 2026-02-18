@@ -111,11 +111,14 @@ const Register = () => {
         otp,
       });
 
-      localStorage.setItem("token", response.data.token);
-      setSuccess("Account verified successfully! Redirecting to dashboard...");
-      setTimeout(() => {
-        navigate("/dashboard");
-      }, 2000);
+      if (response.data?.token) {
+        localStorage.setItem("token", response.data.token);
+        setSuccess("Account verified successfully! Redirecting to dashboard...");
+        setTimeout(() => navigate("/dashboard"), 2000);
+      } else {
+        setSuccess("Account verified. Please sign in to continue.");
+        setTimeout(() => navigate("/login"), 2000);
+      }
     } catch (err) {
       setError(err.response?.data?.message || "OTP verification failed");
     } finally {

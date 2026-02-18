@@ -108,7 +108,7 @@ export const verifyOtp = async(req,res) => {
             { expiresIn: "7d" }
         );
 
-        res.json({message: "Account verified successfully"});
+        res.json({message: "Account verified successfully", token});
     } catch(err){
         console.error(err);
         res.status(500).json({message: "OTP verification failed"});

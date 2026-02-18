@@ -41,12 +41,20 @@ const Dashboard = () => {
                   {user.email}
                 </p>
               </div>
-              <button
-                onClick={handleLogout}
-                className="px-8 py-3 bg-gradient-to-r from-red-600 to-red-700 text-white rounded-lg hover:from-red-700 hover:to-red-800 transition font-semibold hover-lift"
-              >
-                Sign Out
-              </button>
+              <div className="flex gap-3">
+                <button
+                  onClick={() => navigate('/profile')}
+                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition font-semibold"
+                >
+                  Edit Profile
+                </button>
+                <button
+                  onClick={handleLogout}
+                  className="px-6 py-3 bg-gradient-to-r from-red-600 to-red-700 text-white rounded-lg hover:from-red-700 hover:to-red-800 transition font-semibold hover-lift"
+                >
+                  Sign Out
+                </button>
+              </div>
             </div>
 
             {/* Content Grid */}
