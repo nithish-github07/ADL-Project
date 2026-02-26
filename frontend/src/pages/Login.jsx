@@ -36,7 +36,6 @@ const Login = () => {
         password,
       });
 
-      setSuccess("Login successful! Redirecting...");
       localStorage.setItem("token", response.data.token);
 
       setTimeout(() => {

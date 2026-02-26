@@ -41,7 +41,6 @@ export const updateProfile = async (req, res) => {
       }
     });
 
-    // Normalization helper: accept UI-friendly labels (e.g. "Student", "ITI", "Offline")
     const normalizeValue = (val, allowed) => {
       if (val === undefined || val === null) return val;
       if (Array.isArray(val)) return val.map((v) => normalizeValue(v, allowed)).filter(Boolean);
@@ -54,7 +53,7 @@ export const updateProfile = async (req, res) => {
       return s;
     };
 
-    // Allowed enums matching the Mongoose schema
+    
     const ENGAGEMENT_ENUM = ["student", "employed", "self-employed", "unemployed", "apprentice"];
     const QUAL_ENUM = ["8th", "10th", "12th", "iti", "diploma", "ug", "pg"];
     const LANG_ENUM = ["english", "hindi", "tamil", "telugu", "kannada", "malayalam", "marathi", "bengali", "gujarati", "other"];
@@ -62,7 +61,7 @@ export const updateProfile = async (req, res) => {
     const LEARN_PREF_ENUM = ["video", "reading", "hands-on", "mixed"];
     const CERT_STATUS_ENUM = ["completed", "in-progress", "not-started"];
 
-    // Normalize enum-like fields if present
+    
     if (updateData.engagementStatus !== undefined) {
       updateData.engagementStatus = normalizeValue(updateData.engagementStatus, ENGAGEMENT_ENUM);
     }
@@ -90,7 +89,7 @@ export const updateProfile = async (req, res) => {
       });
     }
 
-    // Compute isProfileComplete based on merged current + update
+    
     const requiredForComplete = ["name", "engagementStatus", "qualification", "learningAvailability"];
     const user = await User.findById(userId);
     if (!user) return res.status(404).json({ message: "User not found" });

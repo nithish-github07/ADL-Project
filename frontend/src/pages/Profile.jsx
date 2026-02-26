@@ -7,7 +7,7 @@ const qualificationOptions = ["8th","10th", "12th", "ITI", "Diploma", "UG", "PG"
 const languageOptions = ["English", "Hindi", "Tamil", "Telugu", "Kannada", "Malayalam", "Marathi", "Bengali", "Gujarati", "Other"];
 const preferredModeOptions = ["Online", "Offline", "Hybrid"];
 const learningPrefOptions = ["Video", "Reading", "Hands-on", "Mixed"];
-const certStatusOptions = ["Completed", "In-progress", "N ot-started"];
+const certStatusOptions = ["Completed", "In-progress", "Not-started"];
 
 const Profile = () => {
   const [loading, setLoading] = useState(false);
@@ -31,36 +31,52 @@ const Profile = () => {
   const API = "http://localhost:5000/api/users";
 
   useEffect(() => {
-    const fetchProfile = async () => {
-      const token = localStorage.getItem("token");
-      if (!token) return navigate("/login");
-      try {
-        setLoading(true);
-        const res = await axios.get(`${API}/me`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        const data = res.data;
-        setForm((prev) => ({
-          ...prev,
-          name: data.name || "",
-          careerAspiration: data.careerAspiration || prev.careerAspiration,
-          engagementStatus: data.engagementStatus || "",
-          qualification: data.qualification || "",
-          skills: data.skills || { technical: [], soft: [] },
-          workExperience: data.workExperience || [],
-          certifications: data.certifications || [],
-          preferredLanguages: (data.preferredLanguages || []).map((l) => l) || [],
-          learningAvailability: data.learningAvailability || { hoursPerWeek: "", preferredMode: "" },
-          learningPreferences: data.learningPreferences || "",
-        }));
-      } catch (err) {
-        setError(err.response?.data?.message || "Failed to load profile");
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchProfile();
-  }, [navigate]);
+  const fetchProfile = async () => {
+    const token = localStorage.getItem("token");
+    if (!token) return navigate("/login");
+    try {
+      setLoading(true);
+      const res = await axios.get(`${API}/me`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const data = res.data;
+
+      // Helper to capitalize first letter
+      const capitalize = (str) => {
+        if (!str) return str;
+        // Handle hyphenated words: "self-employed" → "Self-employed"
+        return str.charAt(0).toUpperCase() + str.slice(1);
+      };
+
+      setForm((prev) => ({
+        ...prev,
+        name: data.name || "",
+        careerAspiration: data.careerAspiration || prev.careerAspiration,
+        engagementStatus: capitalize(data.engagementStatus) || "",
+        qualification: (data.qualification || "").toUpperCase() === "UG" || (data.qualification || "").toUpperCase() === "PG" || (data.qualification || "").toUpperCase() === "ITI"
+          ? (data.qualification || "").toUpperCase()
+          : capitalize(data.qualification) || "",
+        skills: data.skills || { technical: [], soft: [] },
+        workExperience: data.workExperience || [],
+        certifications: (data.certifications || []).map((c) => ({
+          ...c,
+          completionStatus: capitalize(c.completionStatus) || "Completed",
+        })),
+        preferredLanguages: (data.preferredLanguages || []).map(capitalize),
+        learningAvailability: {
+          hoursPerWeek: data.learningAvailability?.hoursPerWeek || "",
+          preferredMode: capitalize(data.learningAvailability?.preferredMode) || "",
+        },
+        learningPreferences: capitalize(data.learningPreferences) || "",
+      }));
+    } catch (err) {
+      setError(err.response?.data?.message || "Failed to load profile");
+    } finally {
+      setLoading(false);
+    }
+  };
+  fetchProfile();
+}, [navigate]);
 
   const handleChange = (path, value) => {
     setForm((f) => {
