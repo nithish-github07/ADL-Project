@@ -5,6 +5,7 @@
 backend/node_modules
 backend/.env
 frontend/node_modules/
+recommendation_engine/node_modules
 
 # Python-generated files
 __pycache__/

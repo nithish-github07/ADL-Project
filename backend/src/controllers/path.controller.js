@@ -5,6 +5,34 @@ import axios from "axios";
 
 const AI_SERVICE_URL = process.env.AI_SERVICE_URL || "http://localhost:8000";
 
+const normalizeModules = (modules = []) => {
+    if (!Array.isArray(modules)) {
+        return [];
+    }
+
+    return modules.map((module, index) => {
+        const resources = Array.isArray(module?.resources)
+            ? module.resources.map((resource) => ({
+                type: resource?.type || "link",
+                title: resource?.title || resource?.name || "Resource",
+                url: resource?.url || resource?.link || "",
+            }))
+            : [];
+
+        return {
+            moduleId: module?.moduleId || module?.id || module?.slug || `module-${index + 1}`,
+            title: module?.title || `Module ${index + 1}`,
+            description: module?.description || "",
+            duration: Number.isFinite(module?.duration)
+                ? module.duration
+                : (Number.isFinite(module?.hours) ? module.hours : 0),
+            resources,
+            completed: false,
+            completedAt: null,
+        };
+    });
+};
+
 
 export const createPath = async (req, res) => {
     try {
@@ -47,7 +75,7 @@ export const createPath = async (req, res) => {
         let aiResponse;
         try {
             aiResponse = await axios.post(
-                `${AI_SERVICE_URL}/path/generator`,
+                `${AI_SERVICE_URL}/api/inngest/query`,
                 aiRequestPayload,
                 {
                     timeout: 30000, // 30 second timeout
@@ -67,7 +95,9 @@ export const createPath = async (req, res) => {
         // Extract generated path data from AI service
         const { title, description, modules, estimatedDuration } = aiResponse.data;
 
-        if (!title || !modules || modules.length === 0) {
+        const normalizedModules = normalizeModules(modules);
+
+        if (!title || normalizedModules.length === 0) {
             return res.status(400).json({
                 message: "Invalid response from AI service"
             });
@@ -82,7 +112,7 @@ export const createPath = async (req, res) => {
             currentLevel: aiRequestPayload.currentLevel,
             targetLevel: aiRequestPayload.targetLevel,
             timeline: aiRequestPayload.timeline,
-            modules,
+            modules: normalizedModules,
             status: "not-started",
             progress: 0,
             startDate: new Date(),
@@ -222,4 +252,3 @@ export const updateProgress = async (req, res) => {
         res.status(500).json({ message: "Failed to update progress" });
     }
 };
-
