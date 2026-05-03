@@ -56,8 +56,14 @@ const Dashboard = () => {
               </div>
               <div className="flex gap-3">
                 <button
+                  onClick={() => navigate("/learning-path")}
+                  className="px-4 py-2 bg-gradient-to-r from-blue-600 to-cyan-600 text-white rounded-lg hover:opacity-90 transition font-semibold"
+                >
+                  View Learning Path
+                </button>
+                <button
                   onClick={() => navigate("/profile")}
-                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition font-semibold"
+                  className="px-4 py-2 bg-slate-100 text-slate-700 rounded-lg hover:bg-slate-200 transition font-semibold"
                 >
                   Edit Profile
                 </button>

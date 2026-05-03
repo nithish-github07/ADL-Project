@@ -150,7 +150,7 @@ def _build_learning_path_question(payload: LearningPathRequest) -> str:
         "Use the context to ground recommendations. "
         "Return a JSON object with keys: title, description, estimatedDuration, modules. "
         "modules is an array of 6-10 items. Each module has: moduleId, title, description, duration, resources. "
-        "resources is an array of items with: type, title, url. "
+        "resources MUST be a JSON array of objects (not a string). Each resource item has: type, title, url. "
         "estimatedDuration is an integer number of days.\n\n"
         f"Target role: {target_role}\n"
         f"Current level: {payload.currentLevel}\n"
