@@ -12,12 +12,43 @@ const normalizeModules = (modules = []) => {
     }
 
     return modules.map((module, index) => {
-        const resources = Array.isArray(module?.resources)
-            ? module.resources.map((resource) => ({
-                type: resource?.type || "link",
-                title: resource?.title || resource?.name || "Resource",
-                url: resource?.url || resource?.link || "",
-            }))
+        let rawResources = module?.resources;
+
+        // Aggressively clean resources if it's a malformed string or a string inside an array
+        const cleanString = (str) => {
+            if (typeof str !== 'string') return str;
+            // Remove JavaScript concatenations like ' + \n '
+            let cleaned = str.replace(/['"]\s*\+\s*\n?\s*['"]/g, '');
+            // Remove escaped newlines and extra spaces
+            cleaned = cleaned.replace(/\\n/g, ' ').replace(/\n/g, ' ').trim();
+            // If it looks like a stringified array, try to make it valid JSON
+            if (cleaned.startsWith('[') && cleaned.endsWith(']')) {
+                try {
+                    return JSON.parse(cleaned.replace(/'/g, '"'));
+                } catch (e) {
+                    return cleaned;
+                }
+            }
+            return cleaned;
+        };
+
+        if (Array.isArray(rawResources) && rawResources.length === 1 && typeof rawResources[0] === 'string') {
+            rawResources = cleanString(rawResources[0]);
+        } else if (typeof rawResources === 'string') {
+            rawResources = cleanString(rawResources);
+        }
+
+        const resources = Array.isArray(rawResources)
+            ? rawResources.map((resource) => {
+                if (typeof resource === 'string') {
+                    return { resourceType: "link", title: cleanString(resource), url: "" };
+                }
+                return {
+                    resourceType: resource?.resourceType || resource?.type || "link",
+                    title: resource?.title || resource?.name || "Resource",
+                    url: resource?.url || resource?.link || "",
+                };
+            })
             : [];
 
         return {

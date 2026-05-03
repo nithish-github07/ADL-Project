@@ -39,7 +39,7 @@ const pathSchema = new mongoose.Schema(
                 duration: Number, // in hours
                 resources: [
                     {
-                        type: String,
+                        resourceType: { type: String, default: 'link' },
                         title: String,
                         url: String,
                     }

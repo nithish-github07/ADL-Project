@@ -4,6 +4,7 @@ import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Dashboard from "./pages/Dashboard";
 import Profile from "./pages/Profile";
+import LearningPath from "./pages/LearningPath";
 import ProtectedRoute from "./components/ProtectedRoute";
 
 function App() {
@@ -25,6 +26,22 @@ function App() {
           element={
             <ProtectedRoute>
               <Profile />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/learning-path"
+          element={
+            <ProtectedRoute>
+              <LearningPath />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/learning-path/:id"
+          element={
+            <ProtectedRoute>
+              <LearningPath />
             </ProtectedRoute>
           }
         />

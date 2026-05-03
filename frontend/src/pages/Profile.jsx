@@ -191,13 +191,26 @@ const Profile = () => {
     if (Object.keys(clean.learningAvailability).length === 0) delete clean.learningAvailability;
   }
 
-  try {
-    setLoading(true);
-    const res = await axios.put(`${API}/me`, clean, { headers: { Authorization: `Bearer ${token}` } });
-    setMessage(res.data?.message || "Profile updated");
-    const user = res.data?.user;
-    if (user) localStorage.setItem("user", JSON.stringify(user));
-  } catch (err) {
+    try {
+      setLoading(true);
+      const res = await axios.put(`${API}/me`, clean, { headers: { Authorization: `Bearer ${token}` } });
+      setMessage(res.data?.message || "Profile updated");
+      const user = res.data?.user;
+      if (user) localStorage.setItem("user", JSON.stringify(user));
+
+      // NEW: Generate Learning Path after profile update
+      try {
+        const API_BASE = "http://localhost:5000"; // Assuming default since VITE_API_URL isn't explicitly used here
+        await axios.post(`${API_BASE}/api/learning-paths/generate`, {}, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        // Redirect to learning path page
+        setTimeout(() => navigate("/learning-path"), 1500);
+      } catch (genErr) {
+        console.error("Failed to auto-generate learning path:", genErr);
+        setError("Profile updated, but failed to generate learning path automatically.");
+      }
+    } catch (err) {
     
     const serverMessage = err.response?.data?.message;
     const serverErrors = err.response?.data?.errors;
