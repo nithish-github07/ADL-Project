@@ -4,6 +4,7 @@ import axios from "axios";
 
 
 const AI_SERVICE_URL = process.env.AI_SERVICE_URL || "http://localhost:8000";
+const AI_GENERATE_ENDPOINT = process.env.AI_GENERATE_ENDPOINT || "/api/learning-paths/generate";
 
 const normalizeModules = (modules = []) => {
     if (!Array.isArray(modules)) {
@@ -75,7 +76,7 @@ export const createPath = async (req, res) => {
         let aiResponse;
         try {
             aiResponse = await axios.post(
-                `${AI_SERVICE_URL}/api/inngest/query`,
+                `${AI_SERVICE_URL}${AI_GENERATE_ENDPOINT}`,
                 aiRequestPayload,
                 {
                     timeout: 30000, // 30 second timeout
