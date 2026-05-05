@@ -11,6 +11,7 @@ import os
 import asyncio
 import json
 import re
+import requests
 from data_loader import load_and_chunk_pdf, embed_texts
 from vector_db import QdrantStorage
 from custom_types import (
@@ -150,7 +151,12 @@ def _build_learning_path_question(payload: LearningPathRequest) -> str:
         "Use the context to ground recommendations. "
         "Return a JSON object with keys: title, description, estimatedDuration, modules. "
         "modules is an array of 6-10 items. Each module has: moduleId, title, description, duration, resources. "
+<<<<<<< HEAD
         "resources MUST be a JSON array of objects (not a string). Each resource item has: type, title, url. "
+=======
+        "resources is an array of items with: type, title, url. "
+        "If you do not know the exact URL, set url to an empty string. "
+>>>>>>> e032560 (add scrapping tool)
         "estimatedDuration is an integer number of days.\n\n"
         f"Target role: {target_role}\n"
         f"Current level: {payload.currentLevel}\n"
@@ -240,6 +246,92 @@ def _normalize_modules(raw_modules: list[dict]) -> list[LearningPathModule]:
     return modules
 
 
+def _tavily_search(query: str, max_results: int = 5) -> list[dict]:
+    api_key = os.getenv("TAVILY_API_KEY")
+    if not api_key:
+        return []
+
+    try:
+        response = requests.post(
+            "https://api.tavily.com/search",
+            json={
+                "api_key": api_key,
+                "query": query,
+                "search_depth": "basic",
+                "max_results": max_results,
+                "include_answer": False,
+                "include_images": False,
+            },
+            timeout=15,
+        )
+        response.raise_for_status()
+        data = response.json()
+    except Exception as exc:
+        logger.warning("Tavily search failed: %s", exc)
+        return []
+
+    results = data.get("results", [])
+    return results if isinstance(results, list) else []
+
+
+def _score_tavily_result(title: str, url: str, query_title: str) -> int:
+    title_l = title.lower()
+    url_l = url.lower()
+    tokens = [t for t in re.split(r"\W+", query_title.lower()) if t]
+    if not tokens:
+        return 0
+    score = 0
+    for token in tokens:
+        if token in title_l:
+            score += 3
+        if token in url_l:
+            score += 1
+    return score
+
+
+def _pick_best_tavily_url(results: list[dict], query_title: str) -> str:
+    best_url = ""
+    best_score = 0
+    for result in results:
+        if not isinstance(result, dict):
+            continue
+        title = str(result.get("title") or "")
+        url = str(result.get("url") or "")
+        if not url.startswith("http"):
+            continue
+        score = _score_tavily_result(title, url, query_title)
+        if score > best_score:
+            best_score = score
+            best_url = url
+    return best_url
+
+
+def _build_tavily_query(
+    resource_title: str, module_title: str, target_role: str
+) -> str:
+    parts = [resource_title, module_title, target_role, "course"]
+    return " ".join(p for p in parts if p)
+
+
+async def _enrich_modules_with_tavily(
+    modules: list[LearningPathModule], target_role: str
+) -> list[LearningPathModule]:
+    if not os.getenv("TAVILY_API_KEY"):
+        return modules
+
+    for module in modules:
+        for resource in module.resources:
+            if resource.url and resource.url.startswith("http"):
+                continue
+            query = _build_tavily_query(resource.title, module.title, target_role)
+            results = await asyncio.to_thread(_tavily_search, query)
+            url = _pick_best_tavily_url(results, resource.title)
+            if url:
+                resource.url = url
+
+    return modules
+
+
 def _fallback_learning_path(payload: LearningPathRequest) -> LearningPathResponse:
     target_role = payload.targetJobRole or "Target Role"
     modules = []
@@ -318,7 +410,11 @@ async def generate_learning_path(payload: LearningPathRequest):
     raw_messages = [
         {
             "role": "system",
-            "content": "You output only valid JSON with the required keys. No markdown.",
+            "content": (
+                "You output only valid JSON with the required keys. "
+                "If you do not know an exact URL, set url to an empty string. "
+                "No markdown."
+            ),
         },
         {"role": "user", "content": user_content},
     ]
@@ -341,6 +437,8 @@ async def generate_learning_path(payload: LearningPathRequest):
     modules = _normalize_modules(modules_raw)
     if not modules:
         return _fallback_learning_path(payload)
+
+    modules = await _enrich_modules_with_tavily(modules, payload.targetJobRole or "")
 
     try:
         return LearningPathResponse(
