@@ -191,17 +191,37 @@ def _normalize_modules(raw_modules: list[dict]) -> list[LearningPathModule]:
     for index, module in enumerate(raw_modules):
         resources_raw = module.get("resources", []) if isinstance(module, dict) else []
         resources: list[LearningPathResource] = []
+        
+        # Handle stringified resources
+        if isinstance(resources_raw, str):
+            try:
+                # Try to parse as JSON array
+                resources_raw = json.loads(resources_raw)
+            except:
+                # If not JSON, maybe it's a comma separated list?
+                if "," in resources_raw:
+                    resources_raw = [{"title": r.strip(), "url": ""} for r in resources_raw.split(",")]
+                else:
+                    resources_raw = [{"title": resources_raw, "url": ""}]
+
         if isinstance(resources_raw, list):
             for resource in resources_raw:
-                if not isinstance(resource, dict):
-                    continue
-                resources.append(
-                    LearningPathResource(
-                        type=str(resource.get("type") or "link"),
-                        title=str(resource.get("title") or resource.get("name") or "Resource"),
-                        url=str(resource.get("url") or resource.get("link") or ""),
+                if isinstance(resource, str):
+                    resources.append(
+                        LearningPathResource(
+                            type="link",
+                            title=resource,
+                            url=""
+                        )
                     )
-                )
+                elif isinstance(resource, dict):
+                    resources.append(
+                        LearningPathResource(
+                            type=str(resource.get("type") or resource.get("resourceType") or "link"),
+                            title=str(resource.get("title") or resource.get("name") or "Resource"),
+                            url=str(resource.get("url") or resource.get("link") or ""),
+                        )
+                    )
 
         module_id = None
         if isinstance(module, dict):
