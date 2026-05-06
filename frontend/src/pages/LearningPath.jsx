@@ -19,20 +19,19 @@ const LearningPath = () => {
   const fetchPath = async () => {
     try {
       setLoading(true);
-      const endpoint = id 
+      const endpoint = id
         ? `${API_BASE}/api/learning-paths/${id}`
         : `${API_BASE}/api/learning-paths`;
-      
+
       console.log("Fetching from:", endpoint);
-      
+
       let res = await axios.get(endpoint, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      
+
       // If fetching all, take the first one (most recent)
       let data = Array.isArray(res.data) ? res.data[0] : res.data;
-      
-      // CRITICAL FIX: If we only got a summary (no modules), fetch the full path by ID
+
       if (data && (!data.modules || data.modules.length === 0) && data._id) {
         console.log("Got summary, fetching full path details for:", data._id);
         const detailRes = await axios.get(`${API_BASE}/api/learning-paths/${data._id}`, {
@@ -40,9 +39,9 @@ const LearningPath = () => {
         });
         data = detailRes.data;
       }
-      
+
       console.log("Final Path Data:", data);
-      
+
       if (!data) {
         setError("No learning path found. Please complete your profile to generate one.");
       } else {
@@ -79,7 +78,7 @@ const LearningPath = () => {
     <div className="min-h-screen edu-bg flex items-center justify-center p-4 text-center">
       <div className="bg-white p-8 rounded-2xl shadow-xl max-w-md">
         <p className="text-red-600 font-semibold mb-4">{error}</p>
-        <button 
+        <button
           onClick={() => navigate("/profile")}
           className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
         >
@@ -105,7 +104,7 @@ const LearningPath = () => {
             <div className="space-y-4 flex-1">
               <h1 className="text-4xl font-extrabold gradient-text">{path.title}</h1>
               <p className="text-slate-600 text-lg leading-relaxed">{path.description}</p>
-              
+
               <div className="flex flex-wrap gap-2 pt-2">
                 {path.goalSkills.map((skill, i) => (
                   <span key={i} className="px-3 py-1 bg-blue-50 text-blue-700 text-sm font-medium rounded-full border border-blue-100">
@@ -114,22 +113,21 @@ const LearningPath = () => {
                 ))}
               </div>
             </div>
-            
+
             <div className="bg-slate-50 p-6 rounded-2xl border border-slate-200 min-w-[240px] space-y-4">
               <div className="flex justify-between items-center text-sm">
                 <span className="text-slate-500">Status</span>
-                <span className={`font-bold capitalize ${
-                  path.status === 'completed' ? 'text-green-600' : 'text-blue-600'
-                }`}>{path.status.replace('-', ' ')}</span>
+                <span className={`font-bold capitalize ${path.status === 'completed' ? 'text-green-600' : 'text-blue-600'
+                  }`}>{path.status.replace('-', ' ')}</span>
               </div>
-              
+
               <div className="space-y-2">
                 <div className="flex justify-between text-xs font-bold">
                   <span className="text-slate-600">OVERALL PROGRESS</span>
                   <span className="text-blue-600">{path.progress}%</span>
                 </div>
                 <div className="w-full bg-slate-200 rounded-full h-3 overflow-hidden">
-                  <div 
+                  <div
                     className="bg-gradient-to-r from-blue-500 to-cyan-500 h-full transition-all duration-1000 ease-out"
                     style={{ width: `${path.progress}%` }}
                   ></div>
@@ -185,21 +183,19 @@ const LearningPath = () => {
           {path.modules.map((module, index) => (
             <React.Fragment key={module.moduleId}>
               {/* Module Box */}
-              <div className={`group relative w-full bg-white rounded-2xl p-6 border transition-all duration-300 ${
-                module.completed 
-                ? 'border-green-200 bg-green-50/30' 
-                : 'border-slate-200 hover:border-blue-300 shadow-sm hover:shadow-md'
-              }`}>
+              <div className={`group relative w-full bg-white rounded-2xl p-6 border transition-all duration-300 ${module.completed
+                  ? 'border-green-200 bg-green-50/30'
+                  : 'border-slate-200 hover:border-blue-300 shadow-sm hover:shadow-md'
+                }`}>
                 <div className="flex items-start gap-6">
                   {/* Checkbox */}
                   <div className="pt-1">
-                    <button 
+                    <button
                       onClick={() => handleToggleComplete(module.moduleId, module.completed)}
-                      className={`w-8 h-8 rounded-full border-2 flex items-center justify-center transition-all ${
-                        module.completed 
-                        ? 'bg-green-500 border-green-500 text-white' 
-                        : 'border-slate-300 hover:border-blue-500 bg-white'
-                      }`}
+                      className={`w-8 h-8 rounded-full border-2 flex items-center justify-center transition-all ${module.completed
+                          ? 'bg-green-500 border-green-500 text-white'
+                          : 'border-slate-300 hover:border-blue-500 bg-white'
+                        }`}
                     >
                       {module.completed && (
                         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -211,19 +207,17 @@ const LearningPath = () => {
 
                   <div className="flex-1">
                     <div className="flex flex-col sm:flex-row justify-between items-start gap-2 mb-2">
-                      <h3 className={`text-xl font-bold transition-all ${
-                        module.completed ? 'text-slate-400 line-through' : 'text-slate-800'
-                      }`}>
+                      <h3 className={`text-xl font-bold transition-all ${module.completed ? 'text-slate-400 line-through' : 'text-slate-800'
+                        }`}>
                         {module.title}
                       </h3>
                       <span className="px-3 py-1 bg-slate-100 text-slate-500 text-xs font-bold rounded-md">
                         {module.duration} HOURS
                       </span>
                     </div>
-                    
-                    <p className={`text-sm leading-relaxed mb-4 transition-all ${
-                      module.completed ? 'text-slate-400 opacity-60' : 'text-slate-600'
-                    }`}>
+
+                    <p className={`text-sm leading-relaxed mb-4 transition-all ${module.completed ? 'text-slate-400 opacity-60' : 'text-slate-600'
+                      }`}>
                       {module.description}
                     </p>
 
@@ -231,16 +225,15 @@ const LearningPath = () => {
                     {module.resources && module.resources.length > 0 && (
                       <div className="flex flex-wrap gap-3 mt-4 pt-4 border-t border-slate-100">
                         {module.resources.map((resource, ri) => (
-                          <a 
+                          <a
                             key={ri}
                             href={resource.url}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
-                              module.completed
-                              ? 'bg-slate-50 text-slate-400 border border-slate-100 pointer-events-none'
-                              : 'bg-blue-50 text-blue-600 hover:bg-blue-100 border border-blue-100'
-                            }`}
+                            className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${module.completed
+                                ? 'bg-slate-50 text-slate-400 border border-slate-100 pointer-events-none'
+                                : 'bg-blue-50 text-blue-600 hover:bg-blue-100 border border-blue-100'
+                              }`}
                           >
                             <span className="opacity-70">
                               {resource.resourceType === 'video' ? '📺' : '🔗'}
@@ -254,9 +247,8 @@ const LearningPath = () => {
                 </div>
 
                 {/* Vertical Step Number Bubble */}
-                <div className={`absolute -left-4 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold shadow-sm hidden lg:flex ${
-                  module.completed ? 'bg-green-500 text-white' : 'bg-white border border-slate-200 text-slate-400'
-                }`}>
+                <div className={`absolute -left-4 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold shadow-sm hidden lg:flex ${module.completed ? 'bg-green-500 text-white' : 'bg-white border border-slate-200 text-slate-400'
+                  }`}>
                   {index + 1}
                 </div>
               </div>
@@ -265,19 +257,19 @@ const LearningPath = () => {
               {index < path.modules.length - 1 && (
                 <div className="h-12 w-full flex justify-center items-center">
                   <svg className={`w-8 h-12 ${module.completed ? 'text-green-400' : 'text-slate-300'}`} viewBox="0 0 24 48">
-                    <path 
-                      d="M12 0 L12 48" 
-                      stroke="currentColor" 
-                      strokeWidth="2" 
-                      strokeDasharray="4 4" 
-                      fill="none" 
+                    <path
+                      d="M12 0 L12 48"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeDasharray="4 4"
+                      fill="none"
                     />
-                    <path 
-                      d="M6 38 L12 48 L18 38" 
-                      stroke="currentColor" 
-                      strokeWidth="2" 
-                      strokeLinejoin="round" 
-                      fill="none" 
+                    <path
+                      d="M6 38 L12 48 L18 38"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinejoin="round"
+                      fill="none"
                     />
                   </svg>
                 </div>
@@ -288,13 +280,13 @@ const LearningPath = () => {
 
         {/* Footer controls */}
         <div className="mt-12 flex justify-center gap-4">
-          <button 
+          <button
             onClick={() => navigate('/dashboard')}
             className="px-8 py-3 bg-white text-slate-600 border border-slate-200 rounded-xl font-bold hover:bg-slate-50 transition shadow-sm hover-lift"
           >
             Back to Dashboard
           </button>
-          <button 
+          <button
             onClick={() => navigate('/profile')}
             className="px-8 py-3 bg-gradient-to-r from-blue-600 to-cyan-600 text-white rounded-xl font-bold transition shadow-lg hover-lift"
           >

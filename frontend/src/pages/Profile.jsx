@@ -240,9 +240,26 @@ const Profile = () => {
               <h1 className="text-3xl font-bold gradient-text">Profile</h1>
               <div className="space-x-3">
                 <button type="button" onClick={() => navigate('/dashboard')} className="px-4 py-2 rounded-md bg-slate-100 hover:bg-slate-200">Back</button>
-                <button type="submit" disabled={loading} className="px-4 py-2 rounded-md bg-gradient-to-r from-blue-600 to-cyan-600 text-white">{loading ? 'Saving...' : 'Save'}</button>
+                <button type="submit" disabled={loading} className="px-4 py-2 rounded-md bg-gradient-to-r from-blue-600 to-cyan-600 text-white font-bold shadow-md hover:opacity-90 disabled:opacity-50">
+                  {loading ? (
+                    <div className="flex items-center gap-2">
+                      <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                      Saving...
+                    </div>
+                  ) : 'Save'}
+                </button>
               </div>
             </div>
+
+            {loading && (
+              <div className="fixed inset-0 z-[100] bg-white/80 backdrop-blur-sm flex flex-col items-center justify-center">
+                <div className="spinner w-16 h-16 mb-6"></div>
+                <div className="text-center space-y-2">
+                  <h3 className="text-xl font-bold gradient-text">Generating Your Learning Path</h3>
+                  <p className="text-slate-500 animate-pulse">Our AI is tailoring modules to your career goals...</p>
+                </div>
+              </div>
+            )}
 
             {error && <div className="bg-red-50 border-l-4 border-red-500 text-red-700 p-3 rounded">{error}</div>}
             {message && <div className="bg-green-50 border-l-4 border-green-500 text-green-700 p-3 rounded">{message}</div>}

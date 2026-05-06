@@ -41,7 +41,13 @@ const normalizeModules = (modules = []) => {
         const resources = Array.isArray(rawResources)
             ? rawResources.map((resource) => {
                 if (typeof resource === 'string') {
-                    return { resourceType: "link", title: cleanString(resource), url: "" };
+                    const trimmed = resource.trim();
+                    const isUrl = trimmed.startsWith('http') || trimmed.startsWith('www.');
+                    return { 
+                        resourceType: "link", 
+                        title: isUrl ? "Resource Link" : trimmed, 
+                        url: isUrl ? (trimmed.startsWith('www.') ? `https://${trimmed}` : trimmed) : "" 
+                    };
                 }
                 return {
                     resourceType: resource?.resourceType || resource?.type || "link",
@@ -49,7 +55,9 @@ const normalizeModules = (modules = []) => {
                     url: resource?.url || resource?.link || "",
                 };
             })
-            : [];
+            : (typeof rawResources === 'string' && rawResources.trim() 
+                ? [{ resourceType: "link", title: rawResources.trim(), url: "" }] 
+                : []);
 
         return {
             moduleId: module?.moduleId || module?.id || module?.slug || `module-${index + 1}`,
