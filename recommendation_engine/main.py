@@ -12,6 +12,7 @@ import asyncio
 import json
 import re
 import requests
+from pathlib import Path
 from data_loader import load_and_chunk_pdf, embed_texts
 from vector_db import QdrantStorage
 from custom_types import (
@@ -25,7 +26,7 @@ from custom_types import (
     LearningPathResource,
 )
 
-load_dotenv()
+load_dotenv(dotenv_path=Path(__file__).with_name(".env"))
 
 logger = log.getLogger("uvicorn")
 
@@ -147,17 +148,26 @@ def _build_learning_path_question(payload: LearningPathRequest) -> str:
     sector_line = f"Target sector: {target_sector}\n" if target_sector else ""
 
     return (
-        "Create a structured learning path in JSON format only. "
-        "Use the context to ground recommendations. "
-        "Return a JSON object with keys: title, description, estimatedDuration, modules. "
-        "modules is an array of 6-10 items. Each module has: moduleId, title, description, duration, resources. "
-<<<<<<< HEAD
-        "resources MUST be a JSON array of objects (not a string). Each resource item has: type, title, url. "
-=======
-        "resources is an array of items with: type, title, url. "
-        "If you do not know the exact URL, set url to an empty string. "
->>>>>>> e032560 (add scrapping tool)
-        "estimatedDuration is an integer number of days.\n\n"
+        "Create a structured learning path grounded in the provided context. "
+        "Return ONLY a valid JSON object (no markdown, no prose). "
+        "Use double quotes for all JSON keys and string values. "
+        "Do not include any keys beyond those specified. "
+        "Schema: {"
+        '"title": string, '
+        '"description": string, '
+        '"estimatedDuration": integer (days), '
+        '"modules": [ '
+        "{"
+        '"moduleId": string, '
+        '"title": string, '
+        '"description": string, '
+        '"duration": integer (days), '
+        '"resources": [ {"type": string, "title": string, "url": string} ] '
+        "} ]"
+        " }. "
+        "modules must have 6-10 items. "
+        "Always set every url field to an empty string. "
+        "estimatedDuration must be the total timeline in days.\n\n"
         f"Target role: {target_role}\n"
         f"Current level: {payload.currentLevel}\n"
         f"Target level: {payload.targetLevel}\n"
@@ -365,10 +375,19 @@ def _fallback_learning_path(payload: LearningPathRequest) -> LearningPathRespons
 
 
 def _collect_rag_context(question: str, top_k: int = 5) -> tuple[list[str], list[str]]:
+    qdrant_url = os.getenv("QDRANT_URL")
+    if not qdrant_url:
+        logger.warning("RAG context unavailable: QDRANT_URL is not set")
+        return [], []
+
+    cleaned_question = (question or "").strip()
+    if not cleaned_question:
+        return [], []
+
     try:
-        query_vec = embed_texts([question])[0]
-        store = QdrantStorage()
-        results = store.search(query_vec, top_k=top_k)
+        query_vec = embed_texts([cleaned_question])[0]
+        store = QdrantStorage(url=qdrant_url)
+        results = store.search(query_vec, top_k=max(1, int(top_k)))
         contexts = results.get("contexts", [])
         sources = results.get("sources", [])
         return contexts, sources
@@ -411,9 +430,11 @@ async def generate_learning_path(payload: LearningPathRequest):
         {
             "role": "system",
             "content": (
-                "You output only valid JSON with the required keys. "
-                "If you do not know an exact URL, set url to an empty string. "
-                "No markdown."
+                "You output ONLY a single valid JSON object that matches the schema exactly. "
+                "No markdown, no prose, no trailing text. "
+                "Use double quotes for all JSON keys and string values. "
+                "Do not add extra keys. "
+                "Always set every url field to an empty string."
             ),
         },
         {"role": "user", "content": user_content},
