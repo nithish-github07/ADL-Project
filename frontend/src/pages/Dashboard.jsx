@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import Navbar from "../components/Navbar";
 
 const Dashboard = () => {
   const [user, setUser] = useState(() =>
@@ -65,7 +66,8 @@ const Dashboard = () => {
   const offset = circumference - (progress / 100) * circumference;
 
   return (
-    <div className="relative min-h-screen edu-bg overflow-hidden flex flex-col items-center py-12 px-4">
+    <div className="relative min-h-screen edu-bg overflow-hidden flex flex-col items-center pt-24 pb-12 px-4">
+      <Navbar handleLogout={handleLogout} />
       {/* Background shapes */}
       <div className="absolute inset-0 z-0 pointer-events-none">
         <div className="accent-shape accent-shape-1"></div>

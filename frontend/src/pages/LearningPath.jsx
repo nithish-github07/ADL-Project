@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
+import Navbar from "../components/Navbar";
 
 const LearningPath = () => {
   const { id } = useParams();
@@ -68,9 +69,24 @@ const LearningPath = () => {
     }
   };
 
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
+    navigate("/login");
+  };
+
   if (loading) return (
     <div className="min-h-screen edu-bg flex items-center justify-center">
-      <div className="spinner w-12 h-12"></div>
+      <div className="relative flex items-center justify-center w-24 h-24">
+        {/* Rotating border */}
+        <div className="absolute w-full h-full rounded-full border-4 border-blue-600 border-t-transparent animate-spin"></div>
+        {/* Logo in the center */}
+        <img 
+          src="/logo.png" 
+          alt="Loading..." 
+          className="relative z-10 w-12 h-12 object-contain"
+        />
+      </div>
     </div>
   );
 
@@ -89,7 +105,8 @@ const LearningPath = () => {
   );
 
   return (
-    <div className="relative min-h-screen edu-bg pb-20">
+    <div className="relative min-h-screen edu-bg pb-20 pt-20">
+      <Navbar handleLogout={handleLogout} />
       {/* Background shapes */}
       <div className="absolute inset-0 z-0 pointer-events-none">
         <div className="accent-shape accent-shape-1"></div>

@@ -153,156 +153,166 @@ const Register = () => {
 
         {/* Content */}
         <div className="relative z-10 min-h-screen flex justify-center items-center p-4">
-          <div className="w-full max-w-md">
-            <div className="bg-white rounded-2xl card-shadow p-8 space-y-6">
-              {/* Header */}
-              <div className="text-center space-y-3">
-                <h1 className="text-5xl font-bold gradient-text leading-tight">
-                  Create Account
-                </h1>
-                <p className="text-slate-600 text-sm">Start your learning journey</p>
-              </div>
+          <div className="w-full max-w-6xl flex flex-col md:flex-row items-center justify-between gap-12">
+            {/* Left Side: Logo and Slogan */}
+            <div className="flex-1 text-center md:text-left space-y-6 animate-fade-in order-2 md:order-1">
+              <img
+                src="/fullLogo.png"
+                alt="SkillBridge Logo"
+                className="w-full max-w-lg mx-auto md:mx-0 drop-shadow-2xl"
+              />
+            </div>
 
-              {/* Form */}
-              <form onSubmit={handleRegister} className="space-y-5">
-                {/* Email Field */}
-                <div className="space-y-2">
-                  <label htmlFor="email" className="block text-sm font-semibold text-slate-700">
-                    Email Address
-                  </label>
-                  <input
-                    id="email"
-                    type="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    placeholder="you@example.com"
-                    className="w-full px-4 py-3 bg-slate-50 border-2 border-slate-200 rounded-lg text-slate-900 placeholder-slate-400 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition"
-                    required
-                  />
+            {/* Right Side: Register Card */}
+            <div className="w-full max-w-md order-1 md:order-2">
+              <div className="bg-white rounded-2xl card-shadow p-8 space-y-6">
+                {/* Header */}
+                <div className="text-center md:text-left space-y-3">
+                  <h1 className="text-5xl font-bold gradient-text leading-tight">
+                    Create Account
+                  </h1>
+                  <p className="text-slate-600 text-sm">Start your learning journey</p>
                 </div>
 
-                {/* Password Field */}
-                <div className="space-y-2">
-                  <label htmlFor="password" className="block text-sm font-semibold text-slate-700">
-                    Password
-                  </label>
-                  <div className="relative">
+                {/* Form */}
+                <form onSubmit={handleRegister} className="space-y-5">
+                  {/* Email Field */}
+                  <div className="space-y-2">
+                    <label htmlFor="email" className="block text-sm font-semibold text-slate-700">
+                      Email Address
+                    </label>
                     <input
-                      id="password"
-                      type={showPassword ? "text" : "password"}
-                      value={password}
-                      onChange={handlePasswordChange}
-                      placeholder="Min 8 characters"
+                      id="email"
+                      type="email"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      placeholder="you@example.com"
                       className="w-full px-4 py-3 bg-slate-50 border-2 border-slate-200 rounded-lg text-slate-900 placeholder-slate-400 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition"
                       required
                     />
-                    <button
-                      type="button"
-                      onClick={() => setShowPassword(!showPassword)}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-700 transition text-lg"
-                    >
-                    {showPassword ? <i className = "fa-solid fa-eye-slash" ></i> : <i className = "fa-solid fa-eye"></i>}
-                    </button>
                   </div>
 
-                  {/* Password Strength Indicator Only */}
-                  {password && (
-                    <div className="space-y-2">
-                      <div className="h-2 bg-slate-200 rounded-full overflow-hidden">
-                        <div
-                          className={`h-full bg-gradient-to-r ${getPasswordStrengthColor()} transition-all duration-300`}
-                          style={{ width: `${passwordStrength * 20}%` }}
-                        ></div>
+                  {/* Password Field */}
+                  <div className="space-y-2">
+                    <label htmlFor="password" className="block text-sm font-semibold text-slate-700">
+                      Password
+                    </label>
+                    <div className="relative">
+                      <input
+                        id="password"
+                        type={showPassword ? "text" : "password"}
+                        value={password}
+                        onChange={handlePasswordChange}
+                        placeholder="Min 8 characters"
+                        className="w-full px-4 py-3 bg-slate-50 border-2 border-slate-200 rounded-lg text-slate-900 placeholder-slate-400 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition"
+                        required
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowPassword(!showPassword)}
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-700 transition text-lg"
+                      >
+                        {showPassword ? <i className = "fa-solid fa-eye-slash" ></i> : <i className = "fa-solid fa-eye"></i>}
+                      </button>
+                    </div>
+
+                    {/* Password Strength Indicator Only */}
+                    {password && (
+                      <div className="space-y-2">
+                        <div className="h-2 bg-slate-200 rounded-full overflow-hidden">
+                          <div
+                            className={`h-full bg-gradient-to-r ${getPasswordStrengthColor()} transition-all duration-300`}
+                            style={{ width: `${passwordStrength * 20}%` }}
+                          ></div>
+                        </div>
+                        <p className={`text-xs font-semibold text-center ${
+                          passwordStrength <= 2 ? "text-red-600" :
+                          passwordStrength <= 3 ? "text-amber-600" :
+                          "text-green-600"
+                        }`}>
+                          Strength: {getPasswordStrengthText()}
+                        </p>
                       </div>
-                      <p className={`text-xs font-semibold text-center ${
-                        passwordStrength <= 2 ? "text-red-600" :
-                        passwordStrength <= 3 ? "text-amber-600" :
-                        "text-green-600"
-                      }`}>
-                        Strength: {getPasswordStrengthText()}
-                      </p>
+                    )}
+                  </div>
+
+                  {/* Confirm Password Field */}
+                  <div className="space-y-2">
+                    <label htmlFor="confirmPassword" className="block text-sm font-semibold text-slate-700">
+                      Confirm Password
+                    </label>
+                    <div className="relative">
+                      <input
+                        id="confirmPassword"
+                        type={showConfirmPassword ? "text" : "password"}
+                        value={confirmPassword}
+                        onChange={(e) => setConfirmPassword(e.target.value)}
+                        placeholder="Confirm password"
+                        className="w-full px-4 py-3 bg-slate-50 border-2 border-slate-200 rounded-lg text-slate-900 placeholder-slate-400 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition"
+                        required
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-700 transition text-lg"
+                      >
+                        {showConfirmPassword ? <i className = "fa-solid fa-eye-slash"></i> : <i className = "fa-solid fa-eye"></i>}
+                      </button>
+                    </div>
+                    {confirmPassword && password !== confirmPassword && (
+                      <p className="text-xs text-red-600 text-center">Passwords do not match</p>
+                    )}
+                  </div>
+
+                  {/* Error Message */}
+                  {error && (
+                    <div className="bg-red-50 border-l-4 border-red-500 text-red-700 p-4 rounded-lg">
+                      <p className="font-medium text-sm">⚠️ {error}</p>
                     </div>
                   )}
-                </div>
 
-                {/* Confirm Password Field */}
-                <div className="space-y-2">
-                  <label htmlFor="confirmPassword" className="block text-sm font-semibold text-slate-700">
-                    Confirm Password
-                  </label>
-                  <div className="relative">
-                    <input
-                      id="confirmPassword"
-                      type={showConfirmPassword ? "text" : "password"}
-                      value={confirmPassword}
-                      onChange={(e) => setConfirmPassword(e.target.value)}
-                      placeholder="Confirm password"
-                      className="w-full px-4 py-3 bg-slate-50 border-2 border-slate-200 rounded-lg text-slate-900 placeholder-slate-400 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition"
-                      required
-                    />
-                    <button
-                      type="button"
-                      onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-700 transition text-lg"
-                    >
-                      {showConfirmPassword ? <i className = "fa-solid fa-eye-slash"></i> : <i className = "fa-solid fa-eye"></i>}
-                    </button>
-                  </div>
-                  {confirmPassword && password !== confirmPassword && (
-                    <p className="text-xs text-red-600 text-center">Passwords do not match</p>
+                  {/* Success Message */}
+                  {success && (
+                    <div className="bg-green-50 border-l-4 border-green-500 text-green-700 p-4 rounded-lg">
+                      <p className="font-medium text-sm">✓ {success}</p>
+                    </div>
                   )}
+
+                  {/* Submit Button */}
+                  <button
+                    type="submit"
+                    disabled={loading}
+                    className="w-full py-3 bg-gradient-to-r from-blue-600 to-cyan-600 text-white font-semibold rounded-lg hover:from-blue-700 hover:to-cyan-700 transition disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover-lift"
+                  >
+                    {loading ? (
+                      <span className="flex items-center justify-center space-x-2">
+                        <div className="relative flex items-center justify-center w-6 h-6">
+                          <div className="absolute w-full h-full rounded-full border-2 border-white/30 border-t-white animate-spin"></div>
+                          <img src="/logo.png" alt="Loading" className="relative z-10 w-3 h-3 object-contain" />
+                        </div>
+                        <span>Creating Account...</span>
+                      </span>
+                    ) : (
+                      "Create Account"
+                    )}
+                  </button>
+                </form>
+
+                {/* Divider */}
+                <div className="flex items-center space-x-4">
+                  <div className="flex-1 h-px bg-slate-200"></div>
+                  <p className="text-slate-500 text-sm">Already registered?</p>
+                  <div className="flex-1 h-px bg-slate-200"></div>
                 </div>
 
-                {/* Error Message */}
-                {error && (
-                  <div className="bg-red-50 border-l-4 border-red-500 text-red-700 p-4 rounded-lg">
-                    <p className="font-medium text-sm">⚠️ {error}</p>
-                  </div>
-                )}
-
-                {/* Success Message */}
-                {success && (
-                  <div className="bg-green-50 border-l-4 border-green-500 text-green-700 p-4 rounded-lg">
-                    <p className="font-medium text-sm">✓ {success}</p>
-                  </div>
-                )}
-
-                {/* Submit Button */}
-                <button
-                  type="submit"
-                  disabled={loading}
-                  className="w-full py-3 bg-gradient-to-r from-blue-600 to-cyan-600 text-white font-semibold rounded-lg hover:from-blue-700 hover:to-cyan-700 transition disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover-lift"
+                {/* Login Link */}
+                <Link
+                  to="/login"
+                  className="w-full py-3 border-2 border-blue-600 text-blue-600 font-semibold rounded-lg hover:bg-blue-50 transition text-center hover-lift block"
                 >
-                  {loading ? (
-                    <span className="flex items-center justify-center space-x-2">
-                      <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24">
-                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none"></circle>
-                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                      </svg>
-                      <span>Creating Account...</span>
-                    </span>
-                  ) : (
-                    "Create Account"
-                  )}
-                </button>
-              </form>
-
-              {/* Divider */}
-              <div className="flex items-center space-x-4">
-                <div className="flex-1 h-px bg-slate-200"></div>
-                <p className="text-slate-500 text-sm">Already registered?</p>
-                <div className="flex-1 h-px bg-slate-200"></div>
+                  Sign In
+                </Link>
               </div>
-
-              {/* Login Link */}
-              <Link
-                to="/login"
-                className="w-full py-3 border-2 border-blue-600 text-blue-600 font-semibold rounded-lg hover:bg-blue-50 transition text-center hover-lift block"
-              >
-                Sign In
-              </Link>
-
-              
             </div>
           </div>
         </div>
@@ -321,96 +331,108 @@ const Register = () => {
 
       {/* Content */}
       <div className="relative z-10 min-h-screen flex justify-center items-center p-4">
-        <div className="w-full max-w-md">
-          <div className="bg-white rounded-2xl card-shadow p-8 space-y-6">
-            {/* Header */}
-            <div className="text-center space-y-3">
-              <h1 className="text-5xl font-bold gradient-text leading-tight">
-                Verify Email
-              </h1>
-              <p className="text-slate-600 text-sm">Enter the code sent to your email</p>
-              <p className="text-slate-600 text-sm mt-2">
-                Email: <span className="font-semibold text-slate-900">{email}</span>
-              </p>
-            </div>
+        <div className="w-full max-w-6xl flex flex-col md:flex-row items-center justify-between gap-12">
+          {/* Left Side: Logo and Slogan */}
+          <div className="flex-1 text-center md:text-left space-y-6 animate-fade-in order-2 md:order-1">
+            <img
+              src="/fullLogo.png"
+              alt="SkillBridge Logo"
+              className="w-full max-w-lg mx-auto md:mx-0 drop-shadow-2xl"
+            />
+          </div>
 
-            {/* Form */}
-            <form onSubmit={handleVerifyOtp} className="space-y-5">
-              {/* OTP Input */}
-              <div className="space-y-2">
-                <label htmlFor="otp" className="block text-sm font-semibold text-slate-700 text-center">
-                  Verification Code
-                </label>
-                <input
-                  id="otp"
-                  type="text"
-                  value={otp}
-                  onChange={(e) => setOtp(e.target.value.replace(/\D/g, "").slice(0, 6))}
-                  placeholder="000000"
-                  maxLength="6"
-                  className="w-full px-4 py-4 bg-slate-50 border-2 border-slate-200 rounded-lg text-center text-4xl font-bold text-slate-900 placeholder-slate-400 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition tracking-[0.5em]"
-                  required
-                />
+          {/* Right Side: Verify Card */}
+          <div className="w-full max-w-md order-1 md:order-2">
+            <div className="bg-white rounded-2xl card-shadow p-8 space-y-6">
+              {/* Header */}
+              <div className="text-center md:text-left space-y-3">
+                <h1 className="text-5xl font-bold gradient-text leading-tight">
+                  Verify Email
+                </h1>
+                <p className="text-slate-600 text-sm">Enter the code sent to your email</p>
+                <p className="text-slate-600 text-sm mt-2">
+                  Email: <span className="font-semibold text-slate-900">{email}</span>
+                </p>
               </div>
 
-              {/* Error Message */}
-              {error && (
-                <div className="bg-red-50 border-l-4 border-red-500 text-red-700 p-4 rounded-lg">
-                  <p className="font-medium text-sm">⚠️ {error}</p>
+              {/* Form */}
+              <form onSubmit={handleVerifyOtp} className="space-y-5">
+                {/* OTP Input */}
+                <div className="space-y-2">
+                  <label htmlFor="otp" className="block text-sm font-semibold text-slate-700 text-center">
+                    Verification Code
+                  </label>
+                  <input
+                    id="otp"
+                    type="text"
+                    value={otp}
+                    onChange={(e) => setOtp(e.target.value.replace(/\D/g, "").slice(0, 6))}
+                    placeholder="000000"
+                    maxLength="6"
+                    className="w-full px-4 py-4 bg-slate-50 border-2 border-slate-200 rounded-lg text-center text-4xl font-bold text-slate-900 placeholder-slate-400 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition tracking-[0.5em]"
+                    required
+                  />
                 </div>
-              )}
 
-              {/* Success Message */}
-              {success && (
-                <div className="bg-green-50 border-l-4 border-green-500 text-green-700 p-4 rounded-lg">
-                  <p className="font-medium text-sm">✓ {success}</p>
-                </div>
-              )}
-
-              {/* Verify Button */}
-              <button
-                type="submit"
-                disabled={loading}
-                className="w-full py-3 bg-gradient-to-r from-green-600 to-emerald-600 text-white font-semibold rounded-lg hover:from-green-700 hover:to-emerald-700 transition disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover-lift"
-              >
-                {loading ? (
-                  <span className="flex items-center justify-center space-x-2">
-                    <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24">
-                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none"></circle>
-                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                    </svg>
-                    <span>Verifying...</span>
-                  </span>
-                ) : (
-                  "Verify Code"
+                {/* Error Message */}
+                {error && (
+                  <div className="bg-red-50 border-l-4 border-red-500 text-red-700 p-4 rounded-lg">
+                    <p className="font-medium text-sm">⚠️ {error}</p>
+                  </div>
                 )}
-              </button>
-            </form>
 
-            {/* Resend OTP */}
-            <div className="text-center space-y-3">
-              <p className="text-slate-600 text-sm">Did not receive code?</p>
+                {/* Success Message */}
+                {success && (
+                  <div className="bg-green-50 border-l-4 border-green-500 text-green-700 p-4 rounded-lg">
+                    <p className="font-medium text-sm">✓ {success}</p>
+                  </div>
+                )}
+
+                {/* Verify Button */}
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="w-full py-3 bg-gradient-to-r from-green-600 to-emerald-600 text-white font-semibold rounded-lg hover:from-green-700 hover:to-emerald-700 transition disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover-lift"
+                >
+                  {loading ? (
+                    <span className="flex items-center justify-center space-x-2">
+                      <div className="relative flex items-center justify-center w-6 h-6">
+                        <div className="absolute w-full h-full rounded-full border-2 border-white/30 border-t-white animate-spin"></div>
+                        <img src="/logo.png" alt="Loading" className="relative z-10 w-3 h-3 object-contain" />
+                      </div>
+                      <span>Verifying...</span>
+                    </span>
+                  ) : (
+                    "Verify Code"
+                  )}
+                </button>
+              </form>
+
+              {/* Resend OTP */}
+              <div className="text-center space-y-3">
+                <p className="text-slate-600 text-sm">Did not receive code?</p>
+                <button
+                  onClick={handleResendOtp}
+                  disabled={loading}
+                  className="text-blue-600 font-semibold hover:text-blue-700 underline disabled:opacity-50 text-sm transition"
+                >
+                  {loading ? "Resending..." : "Resend Code"}
+                </button>
+              </div>
+
+              {/* Back Link */}
               <button
-                onClick={handleResendOtp}
-                disabled={loading}
-                className="text-blue-600 font-semibold hover:text-blue-700 underline disabled:opacity-50 text-sm transition"
+                onClick={() => setStep(1)}
+                className="w-full text-slate-600 hover:text-slate-900 transition font-medium text-sm text-center"
               >
-                {loading ? "Resending..." : "Resend Code"}
+                ← Change Email
               </button>
+
+              {/* Footer */}
+              <p className="text-center text-slate-500 text-xs">
+                © 2026 Learning Path Generator. All rights reserved.
+              </p>
             </div>
-
-            {/* Back Link */}
-            <button
-              onClick={() => setStep(1)}
-              className="w-full text-slate-600 hover:text-slate-900 transition font-medium text-sm text-center"
-            >
-              ← Change Email
-            </button>
-
-            {/* Footer */}
-            <p className="text-center text-slate-500 text-xs">
-              © 2026 Learning Path Generator. All rights reserved.
-            </p>
           </div>
         </div>
       </div>

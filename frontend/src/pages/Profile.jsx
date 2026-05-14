@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import Navbar from "../components/Navbar";
 
 const engagementOptions = ["Student", "Employed", "Self-employed", "Unemployed", "Apprentice"];
 const qualificationOptions = ["8th","10th", "12th", "ITI", "Diploma", "UG", "PG"];
@@ -225,8 +226,15 @@ const Profile = () => {
   }
 };
 
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
+    navigate("/login");
+  };
+
   return (
-    <div className="relative min-h-screen edu-bg overflow-hidden">
+    <div className="relative min-h-screen edu-bg overflow-hidden pt-20 pb-12">
+      <Navbar handleLogout={handleLogout} />
       <div className="absolute inset-0 z-0">
         <div className="accent-shape accent-shape-1"></div>
         <div className="accent-shape accent-shape-2"></div>
@@ -253,7 +261,16 @@ const Profile = () => {
 
             {loading && (
               <div className="fixed inset-0 z-[100] bg-white/80 backdrop-blur-sm flex flex-col items-center justify-center">
-                <div className="spinner w-16 h-16 mb-6"></div>
+                <div className="relative flex items-center justify-center w-32 h-32 mb-6">
+                  {/* Rotating border - added border-t-transparent and slightly larger */}
+                  <div className="absolute w-full h-full rounded-full border-4 border-blue-600 border-t-transparent animate-spin"></div>
+                  {/* Logo in the center - guaranteed visible by z-index and no overlap */}
+                  <img 
+                    src="/logo.png" 
+                    alt="Loading..." 
+                    className="relative z-10 w-16 h-16 object-contain"
+                  />
+                </div>
                 <div className="text-center space-y-2">
                   <h3 className="text-xl font-bold gradient-text">Generating Your Learning Path</h3>
                   <p className="text-slate-500 animate-pulse">Our AI is tailoring modules to your career goals...</p>
