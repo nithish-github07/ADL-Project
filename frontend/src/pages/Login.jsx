@@ -59,27 +59,22 @@ const Login = () => {
 
       {/* Content */}
       <div className="relative z-10 min-h-screen flex justify-center items-center p-4">
-        <div className="w-full max-w-6xl flex flex-col md:flex-row items-center justify-between gap-12">
-          {/* Left Side: Logo and Slogan */}
-          <div className="flex-1 text-center md:text-left space-y-6 animate-fade-in order-2 md:order-1">
-            <img
-              src="/fullLogo.png"
-              alt="SkillBridge Logo"
-              className="w-full max-w-lg mx-auto drop-shadow-2xl"
-            />
+        <div className="w-full max-w-md">
+          {/* Logo Section */}
+          <div className="flex items-center justify-center gap-3 mb-8 animate-fade-in">
+            <img src="/logo.png" alt="SkillBridge Logo" className="h-14 w-auto drop-shadow-sm" />
+            <span className="text-3xl font-bold gradient-text">SkillBridge</span>
           </div>
 
-          {/* Right Side: Sign-in Card */}
-          <div className="w-full max-w-md order-1 md:order-2">
-            {/* Card */}
-            <div className="bg-white rounded-2xl card-shadow p-8 space-y-6">
-              {/* Header */}
-              <div className="text-center md:text-left space-y-3">
-                <h1 className="text-4xl font-bold gradient-text leading-tight p-1">
-                  Sign In
-                </h1>
-                <p className="text-slate-600 text-sm mt-0 font-medium">Welcome back! Access your learning journey.</p>
-              </div>
+          {/* Sign-in Card */}
+          <div className="bg-white rounded-2xl card-shadow p-8 space-y-6">
+            {/* Header */}
+            <div className="text-center space-y-3">
+              <h1 className="text-4xl font-bold gradient-text leading-tight p-1">
+                Sign In
+              </h1>
+              <p className="text-slate-600 text-sm mt-0 font-medium">Welcome back! Access your learning journey.</p>
+            </div>
 
               {/* Form */}
               <form onSubmit={handleLogin} className="space-y-5">
@@ -173,7 +168,6 @@ const Login = () => {
                 Create Account
               </Link>
             </div>
-          </div>
         </div>
       </div>
     </div>

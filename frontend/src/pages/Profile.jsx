@@ -12,6 +12,7 @@ const certStatusOptions = ["Completed", "In-progress", "Not-started"];
 
 const Profile = () => {
   const [loading, setLoading] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
   const navigate = useNavigate();
@@ -193,7 +194,7 @@ const Profile = () => {
   }
 
     try {
-      setLoading(true);
+      setIsSaving(true);
       const res = await axios.put(`${API}/me`, clean, { headers: { Authorization: `Bearer ${token}` } });
       setMessage(res.data?.message || "Profile updated");
       const user = res.data?.user;
@@ -222,7 +223,7 @@ const Profile = () => {
       setError(serverMessage || "Failed to update profile");
     }
   } finally {
-    setLoading(false);
+    setIsSaving(false);
   }
 };
 
@@ -231,6 +232,21 @@ const Profile = () => {
     localStorage.removeItem("user");
     navigate("/login");
   };
+
+  if (loading) return (
+    <div className="min-h-screen edu-bg flex items-center justify-center">
+      <div className="relative flex items-center justify-center w-24 h-24">
+        {/* Rotating border */}
+        <div className="absolute w-full h-full rounded-full border-4 border-blue-600 border-t-transparent animate-spin"></div>
+        {/* Logo in the center */}
+        <img 
+          src="/logo.png" 
+          alt="Loading..." 
+          className="relative z-10 w-12 h-12 object-contain"
+        />
+      </div>
+    </div>
+  );
 
   return (
     <div className="relative min-h-screen edu-bg overflow-hidden pt-20 pb-12">
@@ -259,7 +275,7 @@ const Profile = () => {
               </div>
             </div>
 
-            {loading && (
+            {isSaving && (
               <div className="fixed inset-0 z-[100] bg-white/80 backdrop-blur-sm flex flex-col items-center justify-center">
                 <div className="relative flex items-center justify-center w-32 h-32 mb-6">
                   {/* Rotating border - added border-t-transparent and slightly larger */}

@@ -103,12 +103,6 @@ const Dashboard = () => {
             >
               Edit Profile
             </button>
-            <button
-              onClick={handleLogout}
-              className="px-6 py-2.5 bg-white text-red-600 border border-red-100 rounded-xl font-bold hover:bg-red-50 transition shadow-sm hover-lift"
-            >
-              Sign Out
-            </button>
           </div>
         </div>
 
