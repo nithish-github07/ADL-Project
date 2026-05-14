@@ -202,7 +202,7 @@ const Profile = () => {
 
       // NEW: Generate Learning Path after profile update
       try {
-        const API_BASE = "http://localhost:5000"; // Assuming default since VITE_API_URL isn't explicitly used here
+        const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:5000";
         await axios.post(`${API_BASE}/api/learning-paths/generate`, {}, {
           headers: { Authorization: `Bearer ${token}` }
         });

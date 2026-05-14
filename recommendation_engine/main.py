@@ -1,6 +1,8 @@
 import logging as log
 from typing import Any, List, cast
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
+from fastapi.exceptions import RequestValidationError
+from fastapi.responses import JSONResponse
 import inngest
 import inngest.fast_api
 from groq import Groq
@@ -141,6 +143,80 @@ async def rag_query_pdf(ctx: inngest.Context):
 
 app = FastAPI()
 
+@app.exception_handler(RequestValidationError)
+async def validation_exception_handler(request: Request, exc: RequestValidationError):
+    body = await request.body()
+    logger.error(f"Validation error for {request.url}: {exc.errors()}")
+    logger.error(f"Request body: {body.decode()}")
+    return JSONResponse(
+        status_code=422,
+        content={"detail": exc.errors(), "body": body.decode()},
+    )
+
+
+@app.post("/api/learning-paths/generate", response_model=LearningPathResponse)
+async def generate_learning_path(payload: LearningPathRequest):
+    logger.info(f"Received learning path generation request for role: {payload.targetJobRole}")
+    if not os.getenv("GROQ_API_KEY"):
+        return _fallback_learning_path(payload)
+
+    question = _build_learning_path_question(payload)
+    contexts, sources = _collect_rag_context(question)
+    context_block = "\n\n".join(f"- {c}" for c in contexts)
+
+    user_content = (
+        "Use the context below together with the user details to craft the learning path. "
+        "Respond with JSON only.\n\n"
+        f"Context:\n{context_block}\n\n"
+        f"Question:\n{question}"
+    )
+
+    raw_messages = [
+        {
+            "role": "system",
+            "content": (
+                "You output ONLY a single valid JSON object that matches the schema exactly. "
+                "No markdown, no prose, no trailing text. "
+                "Use double quotes for all JSON keys and string values. "
+                "Do not add extra keys. "
+                "Always set every url field to an empty string."
+            ),
+        },
+        {"role": "user", "content": user_content},
+    ]
+    messages = cast(List[ChatCompletionMessageParam], cast(Any, raw_messages))
+
+    try:
+        answer = await _call_groq(messages)
+    except Exception as exc:
+        logger.error("Groq request failed: %s", exc)
+        return _fallback_learning_path(payload)
+
+    parsed = _extract_json(answer)
+    if not parsed:
+        return _fallback_learning_path(payload)
+
+    modules_raw = parsed.get("modules") if isinstance(parsed, dict) else []
+    if not isinstance(modules_raw, list):
+        return _fallback_learning_path(payload)
+
+    modules = _normalize_modules(modules_raw)
+    if not modules:
+        return _fallback_learning_path(payload)
+
+    modules = await _enrich_modules_with_tavily(modules, payload.targetJobRole or "")
+
+    try:
+        return LearningPathResponse(
+            title=str(parsed.get("title") or "Learning Path"),
+            description=str(parsed.get("description") or ""),
+            modules=modules,
+            estimatedDuration=int(parsed.get("estimatedDuration") or payload.timeline),
+            sources=sources,
+        )
+    except Exception:
+        return _fallback_learning_path(payload)
+
 
 def _build_learning_path_question(payload: LearningPathRequest) -> str:
     target_role = payload.targetJobRole or "the chosen role"
@@ -176,10 +252,10 @@ def _build_learning_path_question(payload: LearningPathRequest) -> str:
         f"Hours per week: {payload.hoursPerWeek or 'not specified'}\n"
         f"Preferred mode: {payload.preferredMode or 'not specified'}\n"
         f"Learning preferences: {payload.learningPreferences or 'not specified'}\n"
-        f"Preferred languages: {', '.join(payload.preferredLanguages) if payload.preferredLanguages else 'not specified'}\n"
+        f"Preferred languages: {', '.join(map(str, payload.preferredLanguages)) if payload.preferredLanguages else 'not specified'}\n"
         f"Timeline (days): {payload.timeline}\n"
-        f"Technical skills: {', '.join(payload.technicalSkills) if payload.technicalSkills else 'not specified'}\n"
-        f"Soft skills: {', '.join(payload.softSkills) if payload.softSkills else 'not specified'}\n"
+        f"Technical skills: {', '.join(map(str, payload.technicalSkills)) if payload.technicalSkills else 'not specified'}\n"
+        f"Soft skills: {', '.join(map(str, payload.softSkills)) if payload.softSkills else 'not specified'}\n"
         f"Work experience: {json.dumps(payload.workExperience) if payload.workExperience else 'not specified'}\n"
         f"Certifications: {json.dumps(payload.certifications) if payload.certifications else 'not specified'}\n"
         f"{sector_line}"
@@ -329,15 +405,27 @@ async def _enrich_modules_with_tavily(
     if not os.getenv("TAVILY_API_KEY"):
         return modules
 
+    tasks = []
+    resource_refs = []
+
     for module in modules:
         for resource in module.resources:
-            if resource.url and resource.url.startswith("http"):
-                continue
-            query = _build_tavily_query(resource.title, module.title, target_role)
-            results = await asyncio.to_thread(_tavily_search, query)
-            url = _pick_best_tavily_url(results, resource.title)
-            if url:
-                resource.url = url
+            if not (resource.url and resource.url.startswith("http")):
+                query = _build_tavily_query(resource.title, module.title, target_role)
+                tasks.append(asyncio.to_thread(_tavily_search, query))
+                resource_refs.append((resource, resource.title))
+
+    if not tasks:
+        return modules
+
+    logger.info(f"Enriching {len(tasks)} resources with Tavily...")
+    search_results = await asyncio.gather(*tasks)
+
+    for i, results in enumerate(search_results):
+        resource, title = resource_refs[i]
+        url = _pick_best_tavily_url(results, title)
+        if url:
+            resource.url = url
 
     return modules
 
@@ -410,67 +498,6 @@ async def _call_groq(messages: list[ChatCompletionMessageParam]) -> str:
     return result["choices"][0]["message"]["content"].strip()
 
 
-@app.post("/api/learning-paths/generate", response_model=LearningPathResponse)
-async def generate_learning_path(payload: LearningPathRequest):
-    if not os.getenv("GROQ_API_KEY"):
-        return _fallback_learning_path(payload)
-
-    question = _build_learning_path_question(payload)
-    contexts, sources = _collect_rag_context(question)
-    context_block = "\n\n".join(f"- {c}" for c in contexts)
-
-    user_content = (
-        "Use the context below together with the user details to craft the learning path. "
-        "Respond with JSON only.\n\n"
-        f"Context:\n{context_block}\n\n"
-        f"Question:\n{question}"
-    )
-
-    raw_messages = [
-        {
-            "role": "system",
-            "content": (
-                "You output ONLY a single valid JSON object that matches the schema exactly. "
-                "No markdown, no prose, no trailing text. "
-                "Use double quotes for all JSON keys and string values. "
-                "Do not add extra keys. "
-                "Always set every url field to an empty string."
-            ),
-        },
-        {"role": "user", "content": user_content},
-    ]
-    messages = cast(List[ChatCompletionMessageParam], cast(Any, raw_messages))
-
-    try:
-        answer = await _call_groq(messages)
-    except Exception as exc:
-        logger.error("Groq request failed: %s", exc)
-        return _fallback_learning_path(payload)
-
-    parsed = _extract_json(answer)
-    if not parsed:
-        return _fallback_learning_path(payload)
-
-    modules_raw = parsed.get("modules") if isinstance(parsed, dict) else []
-    if not isinstance(modules_raw, list):
-        return _fallback_learning_path(payload)
-
-    modules = _normalize_modules(modules_raw)
-    if not modules:
-        return _fallback_learning_path(payload)
-
-    modules = await _enrich_modules_with_tavily(modules, payload.targetJobRole or "")
-
-    try:
-        return LearningPathResponse(
-            title=str(parsed.get("title") or "Learning Path"),
-            description=str(parsed.get("description") or ""),
-            modules=modules,
-            estimatedDuration=int(parsed.get("estimatedDuration") or payload.timeline),
-            sources=sources,
-        )
-    except Exception:
-        return _fallback_learning_path(payload)
 
 
 inngest.fast_api.serve(app, inngest_client, [ingest_pdf, rag_query_pdf])

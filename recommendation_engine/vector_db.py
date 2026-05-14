@@ -34,16 +34,18 @@ class QdrantStorage:
         self.client.upsert(self.collection, points=points)
 
     def search(self, query_vector, top_k: int = 5):
-        results = self.client.search(
+        # Using query_points instead of search as it's the more modern API
+        # and search seems to be missing in the current environment's client
+        results = self.client.query_points(
             collection_name=self.collection,
-            query_vector=query_vector,
+            query=query_vector,
             with_payload=True,
             limit=top_k,
         )
 
         contexts = []
         sources = set()
-        for r in results:
+        for r in results.points:
             payload = getattr(r, "payload", None) or {}
             text = payload.get("text", "")
             source = payload.get("source", "")

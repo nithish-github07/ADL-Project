@@ -3,7 +3,7 @@ import User from "../models/User.js";
 import axios from "axios";
 
 
-const AI_SERVICE_URL = process.env.AI_SERVICE_URL || "http://localhost:8000";
+const AI_SERVICE_URL = process.env.AI_SERVICE_URL || "http://127.0.0.1:8000";
 const AI_GENERATE_ENDPOINT = process.env.AI_GENERATE_ENDPOINT || "/api/learning-paths/generate";
 
 const normalizeModules = (modules = []) => {
@@ -78,14 +78,17 @@ export const createPath = async (req, res) => {
     try {
         const userId = req.user.id;
 
+        console.log("Generating path for user:", userId);
         // Fetch complete user profile from database
         const user = await User.findById(userId);
         if (!user) {
+            console.warn("User not found:", userId);
             return res.status(404).json({ message: "User not found" });
         }
 
         // Validate that user profile is complete
         if (!user.isProfileComplete) {
+            console.warn("Profile incomplete for user:", userId);
             return res.status(400).json({
                 message: "Please complete your profile before generating a learning path",
                 requiredFields: ["name", "engagementStatus", "qualification", "learningAvailability"]
@@ -111,6 +114,7 @@ export const createPath = async (req, res) => {
             timeline: req.body.timeline || 90, // Default 90 days
         };
 
+        console.log("Calling AI service with payload:", JSON.stringify(aiRequestPayload, null, 2));
         // Call FastAPI AI Service to generate learning path
         let aiResponse;
         try {
@@ -118,7 +122,7 @@ export const createPath = async (req, res) => {
                 `${AI_SERVICE_URL}${AI_GENERATE_ENDPOINT}`,
                 aiRequestPayload,
                 {
-                    timeout: 30000, // 30 second timeout
+                    timeout: 60000, // 60 second timeout
                     headers: {
                         "Content-Type": "application/json",
                     },
@@ -126,6 +130,10 @@ export const createPath = async (req, res) => {
             );
         } catch (aiError) {
             console.error("AI Service Error: ", aiError.message);
+            if (aiError.response) {
+                console.error("AI Service Response Data:", aiError.response.data);
+                console.error("AI Service Response Status:", aiError.response.status);
+            }
             return res.status(503).json({
                 message: "AI Service unavailable. Please try again later.",
                 error: aiError.message
@@ -224,7 +232,7 @@ export const getPathById = async (req, res) => {
 
 /**
  * POST /api/learning-paths/:id/progress
- * Update module completion status and calculate overall progress
+~ * Update module completion status and calculate overall progress
  */
 export const updateProgress = async (req, res) => {
     try {
